@@ -29,7 +29,9 @@ namespace Microsoft.Qwiq.Exceptions
             {
                 invocation.Proceed();
             }
+            // ReSharper disable CatchAllClause
             catch (Exception e)
+            // ReSharper restore CatchAllClause
             {
                 // .NET 4.5 feature: Capture an exception and re-throw it without changing the stack trace
                 ExceptionDispatchInfo.Capture(_exceptionMapper.Map(e)).Throw();
