@@ -1,6 +1,5 @@
-using System.Diagnostics;
-
 using Castle.DynamicProxy;
+using System.Diagnostics;
 
 namespace Microsoft.Qwiq.Exceptions
 {

@@ -1,22 +1,18 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
-
-using Microsoft.Qwiq.Exceptions;
+using System.Runtime.Serialization;
 
 using Tfs = Microsoft.TeamFoundation.Framework.Client;
 
 namespace Microsoft.Qwiq.Client.Soap
 {
+    [Serializable]
     internal sealed class TeamFoundationIdentity : Qwiq.TeamFoundationIdentity
     {
-        private readonly Lazy<IIdentityDescriptor> _descriptor;
+        //private readonly Tfs.TeamFoundationIdentity _identity;
 
-        private readonly Tfs.TeamFoundationIdentity _identity;
-
-        private readonly Lazy<IEnumerable<IIdentityDescriptor>> _memberOf;
-
-        private readonly Lazy<IEnumerable<IIdentityDescriptor>> _members;
+        private readonly Dictionary<string, object> _properties;
 
         internal TeamFoundationIdentity(Tfs.TeamFoundationIdentity identity)
             : base(
@@ -24,48 +20,65 @@ namespace Microsoft.Qwiq.Client.Soap
                   identity.TeamFoundationId,
                   identity.UniqueUserId)
         {
-            _identity = identity;
+            Descriptor = new IdentityDescriptor(identity.Descriptor);
+            MemberOf = identity.MemberOf?.Select(s => new IdentityDescriptor(s)).ToArray()
+                        ?? ZeroLengthArrayOfIdentityDescriptor;
+            Members = identity.Members?.Select(s => new IdentityDescriptor(s)).ToArray()
+                        ?? ZeroLengthArrayOfIdentityDescriptor;
+            DisplayName = identity.DisplayName;
+            IsContainer = identity.IsContainer;
+            UniqueName = identity.UniqueName;
 
-            _descriptor = new Lazy<IIdentityDescriptor>(
-                () => ExceptionHandlingDynamicProxyFactory.Create<IIdentityDescriptor>(
-                    new IdentityDescriptor(_identity.Descriptor)));
+            _properties = new Dictionary<string, object>(Comparer.OrdinalIgnoreCase);
 
-            _memberOf = new Lazy<IEnumerable<IIdentityDescriptor>>(
-                () => _identity.MemberOf.Select(
-                    item => ExceptionHandlingDynamicProxyFactory.Create<IIdentityDescriptor>(
-                        new IdentityDescriptor(item))));
-
-            _members = new Lazy<IEnumerable<IIdentityDescriptor>>(
-                () => _identity.Members.Select(
-                    item => ExceptionHandlingDynamicProxyFactory.Create<IIdentityDescriptor>(
-                        new IdentityDescriptor(item))));
+            foreach (var p in identity.GetProperties())
+            {
+                _properties[p.Key] = p.Value;
+            }
         }
 
-        public override IIdentityDescriptor Descriptor => _descriptor.Value;
+#pragma warning disable CS0628 // New protected member declared in sealed class
+        protected TeamFoundationIdentity(SerializationInfo info, StreamingContext context)
+#pragma warning restore CS0628 // New protected member declared in sealed class
+            : base(info, context)
+        {
+            Descriptor = (IdentityDescriptor) info.GetValue(nameof(Descriptor), typeof(IdentityDescriptor));
+            DisplayName = info.GetString(nameof(DisplayName));
+            IsContainer = info.GetBoolean(nameof(IsContainer));
+            UniqueName = info.GetString(nameof(UniqueName));
+            _properties = (Dictionary<string, object>) info.GetValue("Properties", typeof(Dictionary<string, object>));
+            MemberOf = (IEnumerable<IIdentityDescriptor>) info.GetValue(nameof(MemberOf), typeof(IEnumerable<IIdentityDescriptor>)) ?? ZeroLengthArrayOfIdentityDescriptor;
+            Members = (IEnumerable<IIdentityDescriptor>)info.GetValue(nameof(Members), typeof(IEnumerable<IIdentityDescriptor>)) ?? ZeroLengthArrayOfIdentityDescriptor;
 
-        public override string DisplayName => _identity.DisplayName;
+        }
 
-        public override bool IsContainer => _identity.IsContainer;
+        public override IIdentityDescriptor Descriptor { get; }
 
-        public override IEnumerable<IIdentityDescriptor> MemberOf => _memberOf.Value;
+        public override string DisplayName { get; }
 
-        public override IEnumerable<IIdentityDescriptor> Members => _members.Value;
+        public override bool IsContainer { get; }
 
-        public override string UniqueName => _identity.UniqueName;
+        public override IEnumerable<IIdentityDescriptor> MemberOf { get; }
+
+        public override IEnumerable<IIdentityDescriptor> Members { get; }
+
+        public override string UniqueName { get; }
 
         public override string GetAttribute(string name, string defaultValue)
         {
-            return _identity.GetAttribute(name, defaultValue);
+            return _properties.TryGetValue(name, out object obj2)
+                ? obj2.ToString()
+                : defaultValue;
         }
 
         public override IEnumerable<KeyValuePair<string, object>> GetProperties()
         {
-            return _identity.GetProperties();
+            return _properties;
         }
 
         public override object GetProperty(string name)
         {
-            return _identity.GetProperty(name);
+            return _properties[name];
         }
     }
 }

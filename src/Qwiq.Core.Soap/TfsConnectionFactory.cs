@@ -17,7 +17,7 @@ namespace Microsoft.Qwiq.Client.Soap
         {
             var tfsServer = new TeamFoundation.Client.TfsTeamProjectCollection(endpoint, credentials);
             tfsServer.EnsureAuthenticated();
-            return tfsServer.AsProxy();
+            return tfsServer.AsExceptionHandlingProxy();
         }
 
         // ReSharper disable ClassNeverInstantiated.Local

@@ -1,11 +1,13 @@
-﻿using Microsoft.VisualStudio.Services.Identity;
-using System;
-using JetBrains.Annotations;
+﻿using JetBrains.Annotations;
 using Microsoft.VisualStudio.Services.Common;
+using Microsoft.VisualStudio.Services.Identity;
+using System;
+using System.Runtime.Serialization;
 
 namespace Microsoft.Qwiq
 {
-    public class IdentityDescriptor : IIdentityDescriptor, IComparable<IdentityDescriptor>, IEquatable<IdentityDescriptor>
+    [Serializable]
+    public class IdentityDescriptor : IIdentityDescriptor, IComparable<IdentityDescriptor>, IEquatable<IdentityDescriptor>, ISerializable
     {
         [NotNull] private string _identifier;
 
@@ -23,10 +25,22 @@ namespace Microsoft.Qwiq
         ///     "Microsoft.TeamFoundation.Identity",
         ///     "S-1-9-1234567890-1234567890-123456789-1234567890-1234567890-1-1234567890-1234567890-1234567890-1234567890"
         /// </example>
+        /// <exception cref="ArgumentException">Value cannot be null or whitespace.</exception>
         public IdentityDescriptor([NotNull] string identityType, [NotNull] string identifier)
         {
+            if (string.IsNullOrWhiteSpace(identityType))
+                throw new ArgumentException("Value cannot be null or whitespace.", nameof(identityType));
+            if (string.IsNullOrWhiteSpace(identifier))
+                throw new ArgumentException("Value cannot be null or whitespace.", nameof(identifier));
+
             IdentityType = identityType;
             Identifier = identifier;
+        }
+
+        protected IdentityDescriptor(SerializationInfo info, StreamingContext context)
+        {
+            IdentityType = (string)info.GetValue(nameof(IdentityType), typeof(string));
+            Identifier = (string)info.GetValue(nameof(Identifier), typeof(string));
         }
 
         public string Identifier
@@ -67,11 +81,6 @@ namespace Microsoft.Qwiq
             return num;
         }
 
-        public override int GetHashCode()
-        {
-            return IdentityTypeId ^ StringComparer.OrdinalIgnoreCase.GetHashCode(Identifier);
-        }
-
         /// <inheritdoc />
         public bool Equals(IdentityDescriptor other)
         {
@@ -84,6 +93,16 @@ namespace Microsoft.Qwiq
             return Equals(obj as IdentityDescriptor);
         }
 
+        public override int GetHashCode()
+        {
+            return IdentityTypeId ^ Comparer.OrdinalIgnoreCase.GetHashCode(Identifier);
+        }
+
+        public void GetObjectData(SerializationInfo info, StreamingContext context)
+        {
+            info.AddValue(nameof(IdentityType), IdentityType);
+            info.AddValue(nameof(Identifier), Identifier);
+        }
         public override string ToString()
         {
             return IdentityTypeMapper.Instance.GetTypeNameFromId(IdentityTypeId) + ";" + _identifier;

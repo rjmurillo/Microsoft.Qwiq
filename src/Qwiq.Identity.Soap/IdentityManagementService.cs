@@ -10,16 +10,25 @@ namespace Microsoft.Qwiq.Identity.Soap
 {
     internal class IdentityManagementService : IIdentityManagementService
     {
+        private readonly bool _proxyCreationEnabled;
         private readonly IIdentityManagementService2 _identityManagementService2;
 
-        internal IdentityManagementService(IIdentityManagementService2 identityManagementService2)
+        internal IdentityManagementService(IIdentityManagementService2 identityManagementService2) : this(identityManagementService2, true)
         {
+        }
+
+        internal IdentityManagementService(IIdentityManagementService2 identityManagementService2, bool proxyCreationEnabled)
+        {
+            _proxyCreationEnabled = proxyCreationEnabled;
             _identityManagementService2 = identityManagementService2 ?? throw new ArgumentNullException(nameof(identityManagementService2));
         }
 
         public IIdentityDescriptor CreateIdentityDescriptor(string identityType, string identifier)
         {
-            return new TeamFoundation.Framework.Client.IdentityDescriptor(identityType, identifier).AsProxy();
+            var retval = new TeamFoundation.Framework.Client.IdentityDescriptor(identityType, identifier);
+            return _proxyCreationEnabled
+                ? retval.AsExceptionHandlingProxy()
+                : retval.AsProxy();
         }
 
         public IEnumerable<ITeamFoundationIdentity> ReadIdentities(IEnumerable<IIdentityDescriptor> descriptors)
@@ -46,7 +55,7 @@ namespace Microsoft.Qwiq.Identity.Soap
             ReadIdentityOptions.IncludeReadFromSource);
 
             // TODO: Use configuration options from IWorkItemStore to control proxy creation
-            return identities.Select(identity => identity?.AsProxy());
+            return identities.Select(identity => _proxyCreationEnabled ? identity?.AsExceptionHandlingProxy() : identity.AsProxy());
         }
 
         public IEnumerable<KeyValuePair<string, IEnumerable<ITeamFoundationIdentity>>> ReadIdentities(
@@ -78,7 +87,7 @@ namespace Microsoft.Qwiq.Identity.Soap
             for (var i = 0; i < searchFactorArray.Length; i++)
             {
                 // TODO: Use configuration options from IWorkItemStore to control proxy creation
-                var proxiedIdentities = identities[i].Select(id => id.AsProxy());
+                var proxiedIdentities = identities[i].Select(id => _proxyCreationEnabled ? id.AsExceptionHandlingProxy() : id.AsProxy());
                 yield return new KeyValuePair<string, IEnumerable<ITeamFoundationIdentity>>(searchFactorArray[i], proxiedIdentities);
             }
         }
@@ -98,12 +107,13 @@ namespace Microsoft.Qwiq.Identity.Soap
             if (string.IsNullOrEmpty(searchFactorValue)) throw new ArgumentException("Value cannot be null or empty.", nameof(searchFactorValue));
 
             // TODO: Use configuration options from IWorkItemStore to control proxy creation
-            return _identityManagementService2.ReadIdentity(
+            var retval = _identityManagementService2.ReadIdentity(
                     (TeamFoundation.Framework.Common.IdentitySearchFactor)searchFactor,
                     searchFactorValue,
                     (TeamFoundation.Framework.Common.MembershipQuery)queryMembership,
-                    ReadIdentityOptions.IncludeReadFromSource)
-                .AsProxy();
+                    ReadIdentityOptions.IncludeReadFromSource);
+
+            return _proxyCreationEnabled ? retval.AsExceptionHandlingProxy() : retval.AsProxy();
         }
     }
 }

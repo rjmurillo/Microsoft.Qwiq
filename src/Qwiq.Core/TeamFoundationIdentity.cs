@@ -2,10 +2,12 @@
 using System;
 using System.Collections.Generic;
 using System.Globalization;
+using System.Runtime.Serialization;
 
 namespace Microsoft.Qwiq
 {
-    public abstract class TeamFoundationIdentity : ITeamFoundationIdentity, IEquatable<ITeamFoundationIdentity>
+    [Serializable]
+    public abstract class TeamFoundationIdentity : ITeamFoundationIdentity, IEquatable<ITeamFoundationIdentity>, ISerializable
     {
         protected internal static readonly IIdentityDescriptor[] ZeroLengthArrayOfIdentityDescriptor = new IIdentityDescriptor[0];
         private string _uniqueName;
@@ -19,6 +21,13 @@ namespace Microsoft.Qwiq
             IsActive = isActive;
             TeamFoundationId = teamFoundationId;
             UniqueUserId = uniqueUserId;
+        }
+
+        protected TeamFoundationIdentity(SerializationInfo info, StreamingContext context)
+        {
+            IsActive = info.GetBoolean(nameof(IsActive));
+            UniqueUserId = info.GetInt32(nameof(UniqueUserId));
+            TeamFoundationId = (Guid)info.GetValue(nameof(TeamFoundationId), typeof(Guid));
         }
 
         public abstract IIdentityDescriptor Descriptor { get; }
@@ -85,6 +94,7 @@ namespace Microsoft.Qwiq
         {
             return TeamFoundationIdentityComparer.Default.Equals(this, other);
         }
+
         public override bool Equals(object obj)
         {
             return Equals(obj as ITeamFoundationIdentity);
@@ -97,9 +107,24 @@ namespace Microsoft.Qwiq
             return Comparer.TeamFoundationIdentity.GetHashCode(this);
         }
 
+        public void GetObjectData(SerializationInfo info, StreamingContext context)
+        {
+            info.AddValue(nameof(UniqueUserId), UniqueUserId);
+            info.AddValue(nameof(TeamFoundationId), TeamFoundationId);
+            info.AddValue(nameof(IsActive), IsActive);
+            info.AddValue(nameof(Descriptor), Descriptor);
+            info.AddValue(nameof(IsContainer), IsContainer);
+            info.AddValue(nameof(DisplayName), DisplayName);
+            info.AddValue(nameof(UniqueName), UniqueName);
+            info.AddValue(nameof(Members), Members);
+            info.AddValue(nameof(MemberOf), MemberOf);
+            info.AddValue("Properties", GetProperties());
+        }
+
         public abstract IEnumerable<KeyValuePair<string, object>> GetProperties();
 
         public abstract object GetProperty(string name);
+
         public override string ToString()
         {
             // Call of .ToString to avoid boxing Guid to Object

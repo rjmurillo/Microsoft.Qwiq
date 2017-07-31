@@ -200,6 +200,7 @@
     <Compile Include="Exceptions\ExceptionMapperTests.cs" />
     <Compile Include="GlobalSuppressions.cs" />
     <Compile Include="Identity\IdentityFieldValueTests.cs" />
+    <Compile Include="Identity\SerializationTests.cs" />
     <Compile Include="Mocks\ExceptionThrower.cs" />
     <Compile Include="Mocks\MockArgumentExceptionMapper.cs" />
     <Compile Include="Mocks\MockException.cs" />
