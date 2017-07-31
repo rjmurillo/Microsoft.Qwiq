@@ -20,8 +20,11 @@ namespace Microsoft.Qwiq.Exceptions
             _exceptionMapper = exceptionMapper;
         }
 
-        public void Intercept(IInvocation invocation)
+        /// <exception cref="ArgumentNullException"><paramref name="invocation"/> is <see langword="null"/></exception>
+        public void Intercept([NotNull] IInvocation invocation)
         {
+            Contract.Requires(invocation != null);
+            if (invocation == null) throw new ArgumentNullException(nameof(invocation));
             try
             {
                 invocation.Proceed();
