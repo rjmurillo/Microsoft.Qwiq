@@ -7,37 +7,25 @@ namespace Microsoft.Qwiq
 {
     public abstract class TeamFoundationIdentity : ITeamFoundationIdentity, IEquatable<ITeamFoundationIdentity>
     {
-        private string _uniqueName;
         protected internal static readonly IIdentityDescriptor[] ZeroLengthArrayOfIdentityDescriptor = new IIdentityDescriptor[0];
+        private string _uniqueName;
 
-        private TeamFoundationIdentity()
-        {
-            MemberOf = ZeroLengthArrayOfIdentityDescriptor;
-            Members = ZeroLengthArrayOfIdentityDescriptor;
-            TeamFoundationId = Guid.Empty;
-        }
         protected internal TeamFoundationIdentity(
             bool isActive,
             Guid teamFoundationId,
             int uniqueUserId
             )
-            : this()
         {
             IsActive = isActive;
             TeamFoundationId = teamFoundationId;
             UniqueUserId = uniqueUserId;
         }
 
-        public bool Equals(ITeamFoundationIdentity other)
-        {
-            return TeamFoundationIdentityComparer.Default.Equals(this, other);
-        }
-
         public abstract IIdentityDescriptor Descriptor { get; }
 
         public abstract string DisplayName { get; }
 
-        public virtual bool IsActive { get; }
+        public bool IsActive { get; }
 
         public virtual bool IsContainer
         {
@@ -56,11 +44,11 @@ namespace Microsoft.Qwiq
             }
         }
 
-        public virtual IEnumerable<IIdentityDescriptor> MemberOf { get; }
+        public abstract IEnumerable<IIdentityDescriptor> MemberOf { get; }
 
-        public virtual IEnumerable<IIdentityDescriptor> Members { get; }
+        public abstract IEnumerable<IIdentityDescriptor> Members { get; }
 
-        public virtual Guid TeamFoundationId { get; }
+        public Guid TeamFoundationId { get; }
 
         public virtual string UniqueName
         {
@@ -91,24 +79,27 @@ namespace Microsoft.Qwiq
             }
         }
 
-        public virtual int UniqueUserId { get; }
+        public int UniqueUserId { get; }
 
-        public abstract string GetAttribute(string name, string defaultValue);
-
-        public abstract IEnumerable<KeyValuePair<string, object>> GetProperties();
-
-        public abstract object GetProperty(string name);
-
+        public bool Equals(ITeamFoundationIdentity other)
+        {
+            return TeamFoundationIdentityComparer.Default.Equals(this, other);
+        }
         public override bool Equals(object obj)
         {
             return Equals(obj as ITeamFoundationIdentity);
         }
 
+        public abstract string GetAttribute(string name, string defaultValue);
+
         public override int GetHashCode()
         {
-            return TeamFoundationIdentityComparer.Default.GetHashCode(this);
+            return Comparer.TeamFoundationIdentity.GetHashCode(this);
         }
 
+        public abstract IEnumerable<KeyValuePair<string, object>> GetProperties();
+
+        public abstract object GetProperty(string name);
         public override string ToString()
         {
             // Call of .ToString to avoid boxing Guid to Object

@@ -58,24 +58,24 @@ namespace Microsoft.Qwiq
 
         public virtual string Path => _path.Value;
 
-        public virtual Uri Uri { get; }
+        public Uri Uri { get; }
 
         [DebuggerStepThrough]
         public bool Equals(INode other)
         {
-            return NodeComparer.Default.Equals(this, other);
+            return Comparer.Node.Equals(this, other);
         }
 
         [DebuggerStepThrough]
         public override bool Equals(object obj)
         {
-            return NodeComparer.Default.Equals(this, obj as INode);
+            return Comparer.Node.Equals(this, obj as INode);
         }
 
         [DebuggerStepThrough]
         public override int GetHashCode()
         {
-            return NodeComparer.Default.GetHashCode(this);
+            return Comparer.Node.GetHashCode(this);
         }
 
         [DebuggerStepThrough]

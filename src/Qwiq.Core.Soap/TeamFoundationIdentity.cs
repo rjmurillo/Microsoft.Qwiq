@@ -8,7 +8,7 @@ using Tfs = Microsoft.TeamFoundation.Framework.Client;
 
 namespace Microsoft.Qwiq.Client.Soap
 {
-    internal class TeamFoundationIdentity : Qwiq.TeamFoundationIdentity
+    internal sealed class TeamFoundationIdentity : Qwiq.TeamFoundationIdentity
     {
         private readonly Lazy<IIdentityDescriptor> _descriptor;
 
@@ -19,7 +19,10 @@ namespace Microsoft.Qwiq.Client.Soap
         private readonly Lazy<IEnumerable<IIdentityDescriptor>> _members;
 
         internal TeamFoundationIdentity(Tfs.TeamFoundationIdentity identity)
-            : base(identity.IsActive, identity.TeamFoundationId, identity.UniqueUserId)
+            : base(
+                  identity.IsActive,
+                  identity.TeamFoundationId,
+                  identity.UniqueUserId)
         {
             _identity = identity;
 
@@ -42,19 +45,13 @@ namespace Microsoft.Qwiq.Client.Soap
 
         public override string DisplayName => _identity.DisplayName;
 
-        public override bool IsActive => _identity.IsActive;
-
         public override bool IsContainer => _identity.IsContainer;
 
         public override IEnumerable<IIdentityDescriptor> MemberOf => _memberOf.Value;
 
         public override IEnumerable<IIdentityDescriptor> Members => _members.Value;
 
-        public override Guid TeamFoundationId => _identity.TeamFoundationId;
-
         public override string UniqueName => _identity.UniqueName;
-
-        public override int UniqueUserId => _identity.UniqueUserId;
 
         public override string GetAttribute(string name, string defaultValue)
         {
