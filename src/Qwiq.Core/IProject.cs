@@ -4,11 +4,11 @@ namespace Microsoft.Qwiq
 {
     public interface IProject : IIdentifiable<Guid>
     {
-        INodeCollection<IAreaOrIteration, int> AreaRootNodes { get; }
+        INodeCollection<IWorkItemClassificationNode, int> AreaRootNodes { get; }
 
         Guid Guid { get; }
 
-        INodeCollection<IAreaOrIteration, int> IterationRootNodes { get; }
+        INodeCollection<IWorkItemClassificationNode, int> IterationRootNodes { get; }
 
         string Name { get; }
 

@@ -4,14 +4,13 @@ using Tfs = Microsoft.TeamFoundation.WorkItemTracking.Client;
 
 namespace Microsoft.Qwiq.Client.Soap
 {
-    internal class Node : Node<IAreaOrIteration, int>
+    internal class Node : Node<IWorkItemClassificationNode, int>
     {
-        internal Node([NotNull] Tfs.Node node, [CanBeNull] INode<IAreaOrIteration, int> parentNode = null)
+        internal Node([NotNull] Tfs.Node node, [CanBeNull] INode<IWorkItemClassificationNode, int> parentNode = null)
             : base(
-                new AreaOrIteration(
+                new WorkItemClassificationNode(
                     node.Id,
-                    node.IsAreaNode,
-                    node.IsIterationNode,
+                    node.IsAreaNode ? WorkItemClassificationNodeType.Area : node.IsIterationNode ? WorkItemClassificationNodeType.Iteration : WorkItemClassificationNodeType.None,
                     node.Name,
                     node.Uri,
                     node.Path),

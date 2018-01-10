@@ -2,7 +2,7 @@ using System;
 
 namespace Microsoft.Qwiq
 {
-    public interface IAreaOrIteration : IEquatable<IAreaOrIteration>, IIdentifiable<int>
+    public interface IWorkItemClassificationNode : IEquatable<IWorkItemClassificationNode>, IIdentifiable<int>
     {
         bool IsAreaNode { get; }
         bool IsIterationNode { get; }

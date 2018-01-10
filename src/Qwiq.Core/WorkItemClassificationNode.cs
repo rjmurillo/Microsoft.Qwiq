@@ -3,17 +3,28 @@ using System.Diagnostics;
 
 namespace Microsoft.Qwiq
 {
-    public class AreaOrIteration : IAreaOrIteration
+    public class WorkItemClassificationNode : IWorkItemClassificationNode
     {
         private readonly Lazy<string> _path;
 
-        public AreaOrIteration(
+        public WorkItemClassificationNode(
+            int id,
+            WorkItemClassificationNodeType type,
+            string name,
+            Uri uri,
+            Lazy<INode<IWorkItemClassificationNode, int>> lazyParent = null
+            )
+        : this(id, type == WorkItemClassificationNodeType.Area, type == WorkItemClassificationNodeType.Iteration, name, uri, lazyParent)
+        {
+        }
+
+        public WorkItemClassificationNode(
             int id,
             bool isAreaNode,
             bool isIterationNode,
             string name,
             Uri uri,
-            Lazy<INode<IAreaOrIteration, int>> lazyParent = null)
+            Lazy<INode<IWorkItemClassificationNode, int>> lazyParent = null)
         {
             Id = id;
             IsAreaNode = isAreaNode;
@@ -31,7 +42,7 @@ namespace Microsoft.Qwiq
         public virtual string Path => _path.Value;
 
         [DebuggerStepThrough]
-        public bool Equals(IAreaOrIteration other)
+        public bool Equals(IWorkItemClassificationNode other)
         {
             return AreaOrIterationComparer.Default.Equals(this, other);
         }
@@ -39,7 +50,7 @@ namespace Microsoft.Qwiq
         [DebuggerStepThrough]
         public override bool Equals(object obj)
         {
-            return AreaOrIterationComparer.Default.Equals(this, obj as IAreaOrIteration);
+            return AreaOrIterationComparer.Default.Equals(this, obj as IWorkItemClassificationNode);
         }
 
         [DebuggerStepThrough]

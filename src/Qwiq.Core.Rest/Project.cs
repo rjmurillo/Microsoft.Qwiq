@@ -32,7 +32,7 @@ namespace Microsoft.Qwiq.Client.Rest
 
                             return new WorkItemTypeCollection(wits2);
                         }),
-                new Lazy<INodeCollection<IAreaOrIteration, int>>(
+                new Lazy<INodeCollection<IWorkItemClassificationNode, int>>(
                     () =>
                         {
                             var result = store.NativeWorkItemStore
@@ -49,7 +49,7 @@ namespace Microsoft.Qwiq.Client.Rest
                             var n = new Node(result).Children;
                             return n;
                         }),
-                new Lazy<INodeCollection<IAreaOrIteration, int>>(
+                new Lazy<INodeCollection<IWorkItemClassificationNode, int>>(
                     () =>
                         {
                             var result = store.NativeWorkItemStore

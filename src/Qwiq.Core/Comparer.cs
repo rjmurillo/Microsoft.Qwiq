@@ -5,12 +5,12 @@ namespace Microsoft.Qwiq
 {
     public static class Comparer
     {
-        public static IEqualityComparer<INode<IAreaOrIteration, int>> AreaOrIterationNode { get; } =
-            NodeComparer<IAreaOrIteration, int>.Default;
+        public static IEqualityComparer<INode<IWorkItemClassificationNode, int>> AreaOrIterationNode { get; } =
+            NodeComparer<IWorkItemClassificationNode, int>.Default;
 
-        public static IEqualityComparer<IReadOnlyObjectWithIdCollection<INode<IAreaOrIteration, int>, int>>
+        public static IEqualityComparer<IReadOnlyObjectWithIdCollection<INode<IWorkItemClassificationNode, int>, int>>
             AreaOrIterationNodeCollection { get; } =
-            ReadOnlyCollectionWithIdComparer<INode<IAreaOrIteration, int>, int>.Default;
+            ReadOnlyCollectionWithIdComparer<INode<IWorkItemClassificationNode, int>, int>.Default;
 
         public static IEqualityComparer<IReadOnlyObjectWithIdCollection<IField, int>> FieldCollection { get; } =
             ReadOnlyCollectionWithIdComparer<IField, int>.Default;
